@@ -1,41 +1,33 @@
-import { Component, OnInit, Output, EventEmitter, OnDestroy } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { NgForm } from '@angular/forms';
+import { Observable } from 'rxjs';
+import { Store } from '@ngrx/store';
 
 import { Exercise } from './../exercise.model';
 import { TrainingService } from './../training.service';
-import { Observable, Subscription } from 'rxjs';
-import { UIService } from '../../shared/ui.service';
+import * as fromTraining from '../training.reducer';
+import * as fromRoot from '../../app.reducer';
 
 @Component({
 selector: 'app-new-training',
   templateUrl: './new-training.component.html',
   styleUrls: ['./new-training.component.scss']
 })
-export class NewTrainingComponent implements OnInit, OnDestroy {
+export class NewTrainingComponent implements OnInit {
 
   @Output() trainingStart = new EventEmitter();
-  exercises: Exercise[] = [];
-  isLoading = true;
-  subscriptions: Subscription[] = [];
+  exercises$: Observable<Exercise[]>;
+  isLoading$: Observable<boolean>;
 
-  constructor(private trainingService: TrainingService, private uiService: UIService) { }
+  constructor(
+    private trainingService: TrainingService,
+    private store: Store<fromTraining.State>
+  ) { }
 
   public ngOnInit(): void {
-    this.subscriptions.push(this.trainingService.exercisesChanged.subscribe( 
-      exercises => this.exercises = exercises
-    ));
-    this.subscriptions.push(this.uiService.loadingStateChanged.subscribe(
-      isLoading => this.isLoading = isLoading
-    ));
+    this.isLoading$ = this.store.select(fromRoot.getIsLoading);
+    this.exercises$ = this.store.select(fromTraining.getAvailableExercises);
     this.fetchExercises();
-  }
-
-  public ngOnDestroy(): void {
-    if(this.subscriptions && this.subscriptions.length > 0){
-      this.subscriptions.forEach(
-        sub => sub.unsubscribe()
-      );
-    }
   }
 
   public onStartTraining(f: NgForm): void {
