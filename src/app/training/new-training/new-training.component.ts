@@ -4,6 +4,7 @@ import { NgForm } from '@angular/forms';
 import { Exercise } from './../exercise.model';
 import { TrainingService } from './../training.service';
 import { Observable, Subscription } from 'rxjs';
+import { UIService } from '../../shared/ui.service';
 
 @Component({
 selector: 'app-new-training',
@@ -14,23 +15,35 @@ export class NewTrainingComponent implements OnInit, OnDestroy {
 
   @Output() trainingStart = new EventEmitter();
   exercises: Exercise[] = [];
-  exerciseSubscription: Subscription;
+  isLoading = true;
+  subscriptions: Subscription[] = [];
 
-  constructor(private trainingService: TrainingService) { }
+  constructor(private trainingService: TrainingService, private uiService: UIService) { }
 
   public ngOnInit(): void {
-    this.exerciseSubscription = this.trainingService.exercisesChanged.subscribe(
+    this.subscriptions.push(this.trainingService.exercisesChanged.subscribe( 
       exercises => this.exercises = exercises
-    );
-    this.trainingService.fetchAvailableExercises();
+    ));
+    this.subscriptions.push(this.uiService.loadingStateChanged.subscribe(
+      isLoading => this.isLoading = isLoading
+    ));
+    this.fetchExercises();
   }
 
   public ngOnDestroy(): void {
-    this.exerciseSubscription.unsubscribe();
+    if(this.subscriptions && this.subscriptions.length > 0){
+      this.subscriptions.forEach(
+        sub => sub.unsubscribe()
+      );
+    }
   }
 
   public onStartTraining(f: NgForm): void {
     this.trainingService.startExercise(f.value.exercise);
+  }
+
+  public fetchExercises(): void {
+    this.trainingService.fetchAvailableExercises();
   }
 
 }

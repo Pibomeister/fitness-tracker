@@ -14,6 +14,7 @@ export class AppComponent implements OnInit {
   constructor(private authservice: AuthService) {}
 
   public ngOnInit(): void {
+    this.authservice.initAuthListener();
     this.isAuth$ = this.authservice.authChange;
   }
 

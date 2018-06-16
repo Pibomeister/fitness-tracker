@@ -1,15 +1,19 @@
 <section>
-    <form fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="5px" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-      <mat-form-field>
-        <input type="email" matInput formControlName="email" placeholder="Your email">
-          <mat-error *ngIf="loginForm.controls['email'].hasError('required')">Field must not be empty</mat-error>
-          <mat-error *ngIf="!loginForm.controls['email'].hasError('required')">E-Mail invalid</mat-error>
-      </mat-form-field>
-      <mat-form-field>
-        <input type="password" matInput formControlName="password"  placeholder="Your password" >
-          <mat-hint align="end">{{loginForm.controls['password'].value?.length}} / 6</mat-hint>
-          <mat-error align="end">{{loginForm.controls['password'].value?.length}} / 6</mat-error>
-      </mat-form-field>
-      <button type="submit" mat-raised-button color="primary" [disabled]="loginForm.invalid">Submit</button>
-    </form>
-  </section>
+  <form fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="5px" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+    <mat-form-field>
+      <input type="email" matInput formControlName="email" placeholder="Your email">
+      <mat-hint align="start">Please enter a valid email</mat-hint>
+      <mat-error *ngIf="loginForm.controls['email'].hasError('required')">Field must not be empty</mat-error>
+      <mat-error *ngIf="loginForm.controls['email'].hasError('email')">Email is incorrect</mat-error>
+    </mat-form-field>
+    <mat-form-field>
+      <input type="password" matInput formControlName="password" placeholder="Your password">
+      <mat-hint align="start">Please enter a valid password</mat-hint>
+      <mat-error align="start" *ngIf="loginForm.controls['password'].hasError('required')">Field must not be empty</mat-error>
+      <mat-hint align="end">{{loginForm.controls['password'].value?.length}} / 6</mat-hint>
+      <mat-error align="end" *ngIf="loginForm.controls['password'].hasError('minlength')">{{loginForm.controls['password'].value?.length}} / 6</mat-error>
+    </mat-form-field>
+    <button *ngIf="!isLoading" type="submit" mat-raised-button color="primary" [disabled]="loginForm.invalid">Submit</button>
+    <mat-spinner *ngIf="isLoading"></mat-spinner>
+  </form>
+</section>
